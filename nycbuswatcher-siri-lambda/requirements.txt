@@ -1,0 +1,6 @@
+requests
+trio
+asks
+pandas
+python-dateutil
+fastparquet

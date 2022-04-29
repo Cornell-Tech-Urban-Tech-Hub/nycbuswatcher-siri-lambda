@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "nycbuswatcher-siri-lambda"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1rc5k7a7wqq4o"
+s3_prefix = "nycbuswatcher-siri-lambda"
+region = "us-east-2"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

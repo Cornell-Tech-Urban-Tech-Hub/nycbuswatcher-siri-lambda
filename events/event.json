@@ -1,0 +1,10 @@
+{
+  "body": "{\"message\": \"nycbuswatcher-siri-lambda\"}",
+  "resource": "/nycbuswatcher-siri-lambda",
+  "path": "/nycbuswatcher-siri-lambda",
+  "httpMethod": "GET",
+  "isBase64Encoded": false,
+  "queryStringParameters": {
+    "key":"088886bd-cc48-4d7c-bd8a-498d353d7d13"
+  }
+}
