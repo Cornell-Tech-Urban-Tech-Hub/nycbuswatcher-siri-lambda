@@ -97,7 +97,8 @@ def lambda_handler(event, context):
             else:
                 pass
     positions_df = pd.DataFrame([vars(x) for x in buses])
-    
+   
+    #FIXME: this results in timestamp getting written as a bigint
     # remove timezone to avoid parquet errors 
     # https://stackoverflow.com/questions/49198068/how-to-remove-timezone-from-a-timestamp-column-in-a-pandas-dataframe
     positions_df['timestamp'] = positions_df['timestamp'].dt.tz_localize(None)
@@ -109,7 +110,7 @@ def lambda_handler(event, context):
     # dump to instance ephemeral storage 
     timestamp = dt.datetime.now().replace(microsecond=0)
     filename=f"{system_id}_{timestamp}.parquet"
-    positions_df.to_parquet(f"/tmp/{filename}", engine="fastparquet")
+    positions_df.to_parquet(f"/tmp/{filename}", engine="fastparquet", coerce_timestamps='ms')
 
     # upload to S3
     lambda_path=f"/tmp/{filename}" 
@@ -119,8 +120,7 @@ def lambda_handler(event, context):
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key)
     s3 = session.resource('s3')
-    result = s3.Bucket(aws_bucket_name).upload_file(lambda_path,s3_path) #FIXME: remove the result= declaration?
-
+    result = s3.Bucket(aws_bucket_name).upload_file(lambda_path,s3_path)
     # report back to invoker
     return {
         "statusCode": 200,
