@@ -22,10 +22,12 @@ def lambda_handler(event, context):
     url_SIRI_suffix="/api/siri/vehicle-monitoring.json?key={}&VehicleMonitoringDetailLevel=calls&LineRef={}"
     
     # aws
-    aws_bucket_name="bus-observatory"
-    aws_region_name="us-east-2"
+    aws_bucket_name="busobservatory"
+    aws_region_name="us-east-1"
     aws_access_key_id = get_secret("lambda-buswatcher-accesskey")['aws_access_key_id']
     aws_secret_access_key = get_secret("lambda-buswatcher-accesskey")['aws_secret_access_key']
+    
+    p = 1 +1
 
     ################################################################## 
     # get current routes
@@ -97,10 +99,6 @@ def lambda_handler(event, context):
             else:
                 pass
     positions_df = pd.DataFrame([vars(x) for x in buses])
-   
-    #FIXME: this results in timestamp getting written as a bigint
-    # remove timezone to avoid parquet errors 
-    # https://stackoverflow.com/questions/49198068/how-to-remove-timezone-from-a-timestamp-column-in-a-pandas-dataframe
     positions_df['timestamp'] = positions_df['timestamp'].dt.tz_localize(None)
     
     ################################################################## 
@@ -110,7 +108,7 @@ def lambda_handler(event, context):
     # dump to instance ephemeral storage 
     timestamp = dt.datetime.now().replace(microsecond=0)
     filename=f"{system_id}_{timestamp}.parquet"
-    positions_df.to_parquet(f"/tmp/{filename}", engine="fastparquet", coerce_timestamps='ms')
+    positions_df.to_parquet(f"/tmp/{filename}", times='int96')
 
     # upload to S3
     lambda_path=f"/tmp/{filename}" 
