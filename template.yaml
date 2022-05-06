@@ -31,7 +31,7 @@ Resources:
           TZ: "America/New_York"
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: 'arn:aws:secretsmanager:us-east-2:703569250339:secret:mta_bustime_api_key-QgJ9y7'
+            SecretArn: 'arn:aws:secretsmanager:us-east-1:870747888580:secret:api_key_nyct_mta_bus_siri-uFRnkM'
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: 'arn:aws:secretsmanager:us-east-1:870747888580:secret:LambdaDeveloperKeys-Mubc5G'
 
