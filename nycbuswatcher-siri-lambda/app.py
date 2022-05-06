@@ -6,28 +6,32 @@ import datetime as dt
 import pandas as pd
 from parser_helper import BusObservation
 import boto3
+from botocore.config import Config
 
 def lambda_handler(event, context):
     
     ################################################################## 
     # configuration
     ################################################################## 
+
+    # aws
+    aws_bucket_name="busobservatory"
+    aws_region_name="us-east-1"
+    aws_secret_name="LambdaDeveloperKeys"
+    aws_access_key_id = get_secret(aws_secret_name,aws_region_name)['aws_access_key_id']
+    aws_secret_access_key = get_secret(aws_secret_name,aws_region_name)['aws_secret_access_key']
     
+    # system to track
+    # store api key in secret api_key_{system_id}
+    # e.g. api_key_nyct_mta_bus_siri
     system_id="nyct_mta_bus_siri"
-    mta_bustime_api_key = get_secret("mta_bustime_api_key")['mta_bustime_api_key']
+    mta_bustime_api_key = get_secret(f'api_key_{system_id}', aws_region_name)['agency_api_key']
 
     # endpoints
     url_OBA_routelist = "http://bustime.mta.info/api/where/routes-for-agency/MTA%20NYCT.json?key={}"
     url_SIRI_root="http://bustime.mta.info"
     url_SIRI_suffix="/api/siri/vehicle-monitoring.json?key={}&VehicleMonitoringDetailLevel=calls&LineRef={}"
     
-    # aws
-    aws_bucket_name="busobservatory"
-    aws_region_name="us-east-1"
-    aws_access_key_id = get_secret("lambda-buswatcher-accesskey")['aws_access_key_id']
-    aws_secret_access_key = get_secret("lambda-buswatcher-accesskey")['aws_secret_access_key']
-    
-    p = 1 +1
 
     ################################################################## 
     # get current routes
@@ -91,12 +95,16 @@ def lambda_handler(event, context):
     for route_report in feeds:
         for route_id,route_data in route_report.items():
             route = route_id.split('_')[1]
-            route_data=route_data.json()            
-            if 'VehicleActivity' in route_data['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]:
-                for monitored_vehicle_journey in route_data['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
-                    bus = BusObservation(route, monitored_vehicle_journey)
-                    buses.append(bus)
-            else:
+            #FIXME: trap this more elegantly
+            try:
+                route_data=route_data.json()            
+                if 'VehicleActivity' in route_data['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]:
+                    for monitored_vehicle_journey in route_data['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
+                        bus = BusObservation(route, monitored_vehicle_journey)
+                        buses.append(bus)
+                else:
+                    pass
+            except:
                 pass
     positions_df = pd.DataFrame([vars(x) for x in buses])
     positions_df['timestamp'] = positions_df['timestamp'].dt.tz_localize(None)
@@ -107,18 +115,20 @@ def lambda_handler(event, context):
     
     # dump to instance ephemeral storage 
     timestamp = dt.datetime.now().replace(microsecond=0)
-    filename=f"{system_id}_{timestamp}.parquet"
+    filename=f"{system_id}_{timestamp}.parquet".replace(" ", "_").replace(":", "_")
     positions_df.to_parquet(f"/tmp/{filename}", times='int96')
 
     # upload to S3
-    lambda_path=f"/tmp/{filename}" 
-    s3_path=f"{system_id}/{system_id}_{timestamp}.parquet" #no leading /
+    source_path=f"/tmp/{filename}" 
+    remote_path=f"{system_id}/{filename}"  
+
     session = boto3.Session(
         region_name=aws_region_name,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key)
     s3 = session.resource('s3')
-    result = s3.Bucket(aws_bucket_name).upload_file(lambda_path,s3_path)
+    result = s3.Bucket(aws_bucket_name).upload_file(source_path,remote_path)
+
     # report back to invoker
     return {
         "statusCode": 200,

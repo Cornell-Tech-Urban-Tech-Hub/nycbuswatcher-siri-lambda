@@ -7,15 +7,13 @@ import base64
 from botocore.exceptions import ClientError
 import json
 
-def get_secret(secret_name):
-
-    region_name = "us-east-2"
+def get_secret(secret_name,aws_region_name):
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(
         service_name='secretsmanager',
-        region_name=region_name
+        region_name=aws_region_name
     )
 
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
