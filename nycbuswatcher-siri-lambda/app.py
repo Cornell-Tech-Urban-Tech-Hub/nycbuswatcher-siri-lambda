@@ -110,7 +110,7 @@ def lambda_handler(event, context):
     positions_df['timestamp'] = positions_df['timestamp'].dt.tz_localize(None)
     
     ################################################################## 
-    # dump S3 as parquet using https://github.com/awslabs/aws-data-wrangler
+    # dump S3 as parquet
     ##################################################################   
     
     # dump to instance ephemeral storage 
