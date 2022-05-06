@@ -8,7 +8,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 600
+    Timeout: 60
 
 Resources:
   NYCBuswatcherSiriFunction:
@@ -33,7 +33,7 @@ Resources:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: 'arn:aws:secretsmanager:us-east-2:703569250339:secret:mta_bustime_api_key-QgJ9y7'
         - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: 'arn:aws:secretsmanager:us-east-2:703569250339:secret:lambda-buswatcher-accesskey-KP2nh9'
+            SecretArn: 'arn:aws:secretsmanager:us-east-1:870747888580:secret:LambdaDeveloperKeys-Mubc5G'
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
