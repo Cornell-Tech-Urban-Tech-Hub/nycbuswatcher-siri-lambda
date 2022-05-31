@@ -33,7 +33,7 @@ Resources:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: 'arn:aws:secretsmanager:us-east-1:870747888580:secret:api_key_nyct_mta_bus_siri-uFRnkM'
         - S3WritePolicy:
-            BucketName: 'busobservatory''
+            BucketName: 'busobservatory'
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
