@@ -17,9 +17,6 @@ def lambda_handler(event, context):
     # aws
     aws_bucket_name="busobservatory"
     aws_region_name="us-east-1"
-    aws_secret_name="LambdaDeveloperKeys"
-    aws_access_key_id = get_secret(aws_secret_name,aws_region_name)['aws_access_key_id']
-    aws_secret_access_key = get_secret(aws_secret_name,aws_region_name)['aws_secret_access_key']
     
     # system to track
     # store api key in secret api_key_{system_id}
@@ -122,10 +119,7 @@ def lambda_handler(event, context):
     source_path=f"/tmp/{filename}" 
     remote_path=f"{system_id}/{filename}"  
 
-    session = boto3.Session(
-        region_name=aws_region_name,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key)
+    session = boto3.Session(region_name=aws_region_name)
     s3 = session.resource('s3')
     result = s3.Bucket(aws_bucket_name).upload_file(source_path,remote_path)
 
@@ -133,6 +127,6 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": f"done. found {len(feeds)} route feeds and wrote {len(positions_df)} to S3.",
+            "message": f"nycbuswatcher-siri-lambda: found {len(feeds)} route feeds and wrote {len(positions_df)} to S3.",
         }),
     }    
