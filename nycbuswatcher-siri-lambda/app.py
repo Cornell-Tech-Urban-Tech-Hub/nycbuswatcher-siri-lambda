@@ -7,6 +7,7 @@ import pandas as pd
 from parser_helper import BusObservation
 import boto3
 from botocore.config import Config
+import os
 
 def lambda_handler(event, context):
     
@@ -122,6 +123,13 @@ def lambda_handler(event, context):
     session = boto3.Session(region_name=aws_region_name)
     s3 = session.resource('s3')
     result = s3.Bucket(aws_bucket_name).upload_file(source_path,remote_path)
+    
+    
+     # clean up /tmp
+    try:
+        os.remove(source_path)
+    except:
+        pass
 
     # report back to invoker
     return {
