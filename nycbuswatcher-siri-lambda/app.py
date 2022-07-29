@@ -118,7 +118,7 @@ def lambda_handler(event, context):
 
     # upload to S3
     source_path=f"/tmp/{filename}" 
-    remote_path=f"{system_id}/unpartitioned/{filename}"  
+    remote_path=f"{system_id}/{filename}"  
 
     session = boto3.Session(region_name=aws_region_name)
     s3 = session.resource('s3')
